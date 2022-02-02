@@ -1,11 +1,10 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-// #include <string_view>
 
-// #define big_string
+#define big_string
 // #define small_string
-#define c_str
+// #define c_str
 // #define with_endl
 // #define without_endl
 // #define no_reference
@@ -13,6 +12,7 @@
 // #define STRING_VIEW
 // #define better_reference
 // #define better_string_view
+// #define rat_string_literal
 
 void* operator new(size_t size)
 {
@@ -25,6 +25,8 @@ int main()
 {
   std::string hello_world = "Hello world Hello World Hello World";
   std::cout << hello_world << '\n';
+
+  return 0;
 }
 #endif
 
@@ -33,6 +35,8 @@ int main()
 {
   std::string hello_world = "Hello world";
   std::cout << hello_world << '\n';
+
+  return 0;
 }
 #endif
 
@@ -44,6 +48,8 @@ int main()
   {
     file << "Hello World" << std::endl;
   }
+
+  return 0;
 }
 #endif
 
@@ -55,7 +61,10 @@ int main()
   {
     os << "Hello World\n";
   }
+  // If you want to flush ou can do it like this.
   os << std::flush;
+
+  return 0;
 }
 #endif
 
@@ -65,6 +74,8 @@ int main()
   const char hello_world[] = "Hello World Hello World Hello World";
   auto print = [](const char str[]) { std::cout << str << '\n';};
   print(hello_world);
+
+  return 0;
 }
 #endif
 
@@ -74,6 +85,8 @@ int main()
   std::string hello_world = "Hello World Hello World Hello World";
   auto print = [](std::string str) { std::cout << str << '\n';};
   print(hello_world);
+
+  return 0;
 }
 #endif
 
@@ -83,6 +96,8 @@ int main()
   std::string hello_world = "Hello World Hello World Hello World";
   auto print = [](const std::string& str) { std::cout << str << '\n';};
   print(hello_world);
+
+  return 0;
 }
 #endif
 
@@ -92,6 +107,8 @@ int main()
   std::string hello_world = "Hello World Hello World Hello World";
   auto print = [](std::string_view str) { std::cout << str << '\n';};
   print(hello_world);
+
+  return 0;
 }
 #endif
 
@@ -100,6 +117,8 @@ int main()
 {
   auto print = [](const std::string& str) { std::cout << str << '\n';};
   print("Hello World Hello World Hello World");
+
+  return 0;
 }
 #endif
 
@@ -108,5 +127,24 @@ int main()
 {
   auto print = [](std::string_view str) { std::cout << str << '\n';};
   print("Hello World Hello World Hello World");
+
+  return 0;
+}
+#endif
+
+// This is not an example of string Optimization but of raw string literals.
+#ifdef rat_string_literal
+int main()
+{
+  // Normal string.
+  std::string str_1 = "\nHe\tllo\rworld\n";
+
+  // Raw string literal
+  std::string str_2 = R"(\nHe\tllo\rworld\n)";
+
+  std::cout << "String 1: " << str_1 << '\n';
+  std::cout << "String 2: " << str_2 << '\n';
+
+  return 0;
 }
 #endif
