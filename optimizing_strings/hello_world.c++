@@ -5,13 +5,14 @@
 
 // #define big_string
 // #define small_string
+#define c_str
 // #define with_endl
 // #define without_endl
 // #define no_reference
 // #define reference
 // #define STRING_VIEW
 // #define better_reference
-#define better_string_view
+// #define better_string_view
 
 void* operator new(size_t size)
 {
@@ -55,6 +56,15 @@ int main()
     os << "Hello World\n";
   }
   os << std::flush;
+}
+#endif
+
+#ifdef c_str
+int main()
+{
+  const char hello_world[] = "Hello World Hello World Hello World";
+  auto print = [](const char str[]) { std::cout << str << '\n';};
+  print(hello_world);
 }
 #endif
 
