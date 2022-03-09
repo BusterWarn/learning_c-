@@ -6,11 +6,14 @@
 #include <iterator>
 #include <numeric>
 #include <span>
+#include <string>
+#include <string_view>
 
 // #define CPP_17
 #define CPP_20
 // #define GET_AUTO
 // #define CAN_CANT_DO
+// #define WILL_NOT_COMPILE
 
 const auto is_even = [](int number) { return number % 2 == 0; };
 const auto square = [](int number) { return number * number; };
@@ -63,6 +66,23 @@ void get_auto_type()
   // Could not get to compile
   // std::ranges::transform_view<std::ranges::subrange<__gnu_cxx::__normal_iterator<int*, std::vector<int> >, __gnu_cxx::__normal_iterator<int*, std::vector<int> >, std::ranges::subrange_kind::sized>, <lambda(int)> > v3 = std::ranges::subrange(vec.begin(), vec.end()) | std::views::transform(square);
 #endif
+}
+
+// All code here is stolen from Tristan Brindle at CppCon 2020
+void test_borrowed_range()
+{
+  // compiles into std::ranges::dangling which is an empty struct with no operations.
+  auto iter = std::ranges::min_element(get_vector());
+
+#ifdef WILL_NOT_COMPILE
+  std::cout << "min element: " << *iter << '\n';
+#endif
+
+  std::string str = "Hello world";
+  // Weird, but okay:
+  auto iter2 = std::string_view{str}.begin();
+  // Did not work
+  // *iter2 = 'h';
 }
 
 #ifdef CPP_17
