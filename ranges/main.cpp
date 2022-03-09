@@ -137,7 +137,7 @@ void funky_func()
 
   // get_span() returns an rvalue span
   // Okay: span is a borrowed range (and usually a view)
-  // auto v2 = get_span() : std::views::transform(func);
+  auto v2 = get_span() | std::views::transform(is_even);
 
   // Okay: rvalue subrange is borrowed (and a view)
   auto v3 = std::ranges::subrange(vec.begin(), vec.end())
