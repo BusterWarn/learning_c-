@@ -16,4 +16,4 @@ valgrind:	main
 	valgrind --leak-check=full --show-reachable=yes --track-origins=yes ./mish
 
 clean:
-	rm -f sub *.o core
+	rm -f ranges *.o core
