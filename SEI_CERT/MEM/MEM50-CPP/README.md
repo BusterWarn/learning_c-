@@ -7,9 +7,27 @@ display_string(str_func().c_str());
 
 Output:
 ```
-learning_cpp/SEI_CERT/MEM/MEM50-CPP$ g++ main.cpp -O3
-learning_cpp/SEI_CERT/MEM/MEM50-CPP$ ./a.out 
-@�>��
+f_1()
+°▬╦çY☻
+
+f_2()
 Hello world!
+
+f_3()
 Hello world!
+
+e_1()
+Construct E
+Destruct E
+Hello world!
+
+e_2()
+Construct E
+Hello world!
+Destruct E
+
+e_3()
+Construct E
+Hello world!
+Destruct E
 ```
