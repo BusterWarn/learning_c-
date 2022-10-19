@@ -1,28 +1,30 @@
 #include <iostream>
 #include <variant>
-#include <string>
-
+#include <utility>
+#include <type_traits>
 
 #include "nucelar_submarine.h"
 
 
+template<typename ... base>
+struct visitor : base ...
+{
+  using base::operator()...;
+};
+
+template<typename ... T>
+visitor(T ...) -> visitor<T...>;
+
 int main(void)
 {
-  nucelar_submarine sub = nucelar_submarine();
-  sub.load();
-  sub.fire();
+  constexpr visitor visit_sub
+  {
+    [] (nuclear::invalid_submarine sub) -> void { std::cout << "Submarine does not have orders to fire\n"; },
+    [] (nuclear::live_submarine sub) -> void { sub.load_warhead(); sub.fire_warhead(); }
+  };
 
-  std::variant<int, float> data;
-  data = 5;
-  if (std::get_if<int>(&data))
-  {
-    std::cout << "INTEGER\n";
-  }
-  else
-  {
-    std::cout << "FLOAT\n";
-  }
-  data = 5;
+  const auto submarine = nuclear::create_sub(nuclear::orders_from_president::fire);
+  std::visit(visit_sub, submarine);
 
   return 0;
 }
