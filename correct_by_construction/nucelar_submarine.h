@@ -12,29 +12,27 @@ namespace nuclear
 enum class orders_from_president
 {
   do_not_fire = 0,
-  fire = 1
+  perform_test = 1,
+  fire = 2
 };
 
-class submarine
-{
-public:
-  virtual void load_warhead() = 0;
-  virtual void fire_warhead() = 0;
-};
+struct invalid_submarine{};
 
-class invalid_submarine : public submarine
+class test_submarine
 {
 public:
-  void load_warhead() override
+  void load_warhead()
   {
+    std::cout << "This is a test, but it is very serious. Prepare to fire!\n";
   }
 
-  void fire_warhead() override
+  void fire_warhead()
   {
+    std::cout << "Kaboooom! Good job submarine crew we have successfully performed the test. Hope no one died by a kitchen fire.\n";
   }
 };
 
-class live_submarine : public submarine
+class live_submarine
 {
 public:
   live_submarine()
@@ -42,7 +40,7 @@ public:
     m_detonate = []() { std::cout << "No warhead is loaded\n"; };
   }
 
-  void load_warhead() override
+  void load_warhead()
   {
     std::cout << "Loading warhead\n";
     m_detonate = []()
@@ -52,7 +50,7 @@ public:
     };
   }
 
-  void fire_warhead() override
+  void fire_warhead()
   {
     m_detonate();
   }
@@ -61,13 +59,18 @@ private:
   std::function<void(void)> m_detonate;
 };
 
-
-std::variant<live_submarine, invalid_submarine> create_sub(orders_from_president&& orders)
+// This simple function could be replaced by some builder pattern.
+auto create_sub(const orders_from_president&& orders) -> std::variant<live_submarine,
+                                                                      test_submarine,
+                                                                      invalid_submarine> 
 {
+  // Note that business logic could fail here, and the object created would not be valid.
   switch (orders)
   {
     case orders_from_president::do_not_fire:
       return invalid_submarine();
+    case orders_from_president::perform_test:
+      return test_submarine();
     case orders_from_president::fire:
       return live_submarine();
   }
