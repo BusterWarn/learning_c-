@@ -1,6 +1,6 @@
 # System include with static analyzers
 
-Have you ever included an external library and for some reason that library does not pass your [static analyzers](https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html), like for example [-Wconversion](https://gcc.gnu.org/wiki/NewWconversion). Maybe it's because you're using the wrong [directory options](https://gcc.gnu.org/wiki/NewWconversion) and adding their directories as search paths with `-I` or `-iquote` instead of `-isystem`.
+Have you ever included an external library and for some reason that library does not pass your [static analyzers](https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html), like for example [-Wconversion](https://gcc.gnu.org/wiki/NewWconversion). Maybe it's because you're using the wrong [directory options](https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html) and adding their directories as search paths with `-I` or `-iquote` instead of `-isystem`.
 
 Compilation output:
 ```bash
