@@ -33,6 +33,15 @@ private:
 };
 
 [[nodiscard]]
+auto is_xml_safe(const std::string_view xml) -> std::expected<std::string, unsafe_xml_error>
+{
+  if (xml.find("password") != std::string::npos)
+    return std::unexpected(unsafe_xml_error("That is really not a safe password"));
+  
+  return std::string("xml is safe");
+}
+
+[[nodiscard]]
 auto parse_xml(const std::string_view xml) -> std::expected<std::string, std::variant<xml_error, unsafe_xml_error>>
 {
   // This check doesn't actually work
@@ -43,8 +52,8 @@ auto parse_xml(const std::string_view xml) -> std::expected<std::string, std::va
   if (xml.find("<body>") == std::string::npos || xml.find("</body>") == std::string::npos)
     return std::unexpected(xml_error::invalid_syntax);
 
-  if (xml.find("password") != std::string::npos)
-    return std::unexpected(unsafe_xml_error("That is really not a safe password"));
+  if (const auto response = is_xml_safe(xml); !response.has_value())
+    return std::unexpected(response.error());
 
   return std::string("ok");
 }

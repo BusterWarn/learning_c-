@@ -13,8 +13,7 @@ const char* invalid_char_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <body
 const char* unsafe_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <body> password=123 </body>";
 
 [[nodiscard]]
-std::uint32_t parse_xml(const std::string_view xml,
-                        std::string& out_parsed_data)
+auto parse_xml(const std::string_view xml, std::string& out_parsed_data) -> std::uint32_t
 {
   // This check doesn't actually work
   for (const char c : xml)
