@@ -33,7 +33,7 @@ auto parse_xml(const std::string_view xml, std::string& out_parsed_data) -> std:
 auto main(void) -> int
 {
   std::string parsed_xml;
-  const auto response = parse_xml(parsed_xml, parsed_xml);
+  const auto response = parse_xml(ok_xml, parsed_xml);
 
   if (response == OK_XML)
   {
