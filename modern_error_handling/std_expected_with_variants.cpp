@@ -35,7 +35,7 @@ private:
 [[nodiscard]]
 auto parse_xml(const std::string_view xml) -> std::expected<std::string, std::variant<xml_error, unsafe_xml_error>>
 {
-  // This check doesen't actually work
+  // This check doesn't actually work
   for (const char c : xml)
     if (static_cast<unsigned char>(c) > 127)
       return std::unexpected(xml_error::invalid_char);
@@ -44,7 +44,7 @@ auto parse_xml(const std::string_view xml) -> std::expected<std::string, std::va
     return std::unexpected(xml_error::invalid_syntax);
 
   if (xml.find("password") != std::string::npos)
-    return std::string("ok");// std::unexpected(unsafe_xml_error("That is really not a safe password"));
+    return std::unexpected(unsafe_xml_error("That is really not a safe password"));
 
   return std::string("ok");
 }
@@ -60,15 +60,19 @@ auto main(void) -> int
   else
   {
     std::visit(overloaded {
-      [](xml_error& e)
+      [](xml_error e)
       {
-        std::cout << "ERROR xml_error " << e << '\n';
+        switch (e)
+        {
+          case xml_error::invalid_char: { std::cout << "ERROR invalid_char\n"; break; }
+          case xml_error::invalid_syntax: { std::cout << "ERROR invalid_syntax\n"; break; }
+        }
       },
-      [](unsafe_xml_error& e)
+      [](unsafe_xml_error e)
       {
-        std::cout << "ERROR unsafe_xml_error " << e.what << '\n';
+        std::cout << "ERROR unsafe_xml_error " << e.what() << '\n';
       },
-      [](auto& e)
+      [](auto& [[maybe_unused]] e)
       {
         std::cout << "ERROR ...\n";
       }

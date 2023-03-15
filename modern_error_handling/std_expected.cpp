@@ -17,7 +17,7 @@ enum class xml_error
 [[nodiscard]]
 auto parse_xml(const std::string_view xml) -> std::expected<std::string, xml_error>
 {
-  // This check doesen't actually work
+  // This check doesn't actually work
   for (const char c : xml)
     if (static_cast<unsigned char>(c) > 127)
       return std::unexpected(xml_error::invalid_char);
@@ -47,6 +47,11 @@ auto main(void) -> int
   else if (response.error() == xml_error::invalid_char)
   {
     std::cout << "ERROR: xml_error::invalid_char\n";
+    return 1;
+  }
+  else if (response.error() == xml_error::unsafe_xml)
+  {
+    std::cout << "ERROR: xml_error::unsafe_xml\n";
     return 1;
   }
 }

@@ -16,7 +16,7 @@ const char* unsafe_xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <body> pass
 std::uint32_t parse_xml(const std::string_view xml,
                         std::string& out_parsed_data)
 {
-  // This check doesen't actually work
+  // This check doesn't actually work
   for (const char c : xml)
     if (static_cast<unsigned char>(c) > 127)
       return INVALID_CHAR_XML;

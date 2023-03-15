@@ -1,10 +1,19 @@
 #include <string>
 #include <iostream>
-#include <cstdint>
 #include <stdexcept>
 
-// #define cause_crash
-#ifdef cause_crash
+// #define CRASH
+#ifdef CRASH
+#include <vector>
+#endif
+
+// #define UNDEFINED_BEHAVIOUR
+#ifdef UNDEFINED_BEHAVIOUR
+#include <vector>
+#endif
+
+// #define UNDEFINED_BEHAVIOUR_CRASH
+#ifdef UNDEFINED_BEHAVIOUR_CRASH
 #include <memory>
 #endif
 
@@ -28,7 +37,7 @@ public:
 [[nodiscard]]
 std::string parse_xml(const std::string_view xml)
 {
-  // This check doesen't actually work
+  // This check doesn't actually work
   for (const char c : xml)
     if (static_cast<unsigned char>(c) > 127)
       throw std::invalid_argument("Invalid XML");
@@ -39,7 +48,17 @@ std::string parse_xml(const std::string_view xml)
   if (xml.find("password") != std::string::npos)
     throw unsafe_xml_exception("That is really not a safe password");
 
-#ifdef cause_crash
+#ifdef CRASH
+  std::vector<int> vec = {1, 2, 3};
+  const auto value = vec.at(4);
+#endif
+
+#ifdef UNDEFINED_BEHAVIOUR
+  std::vector<int> vec = {1, 2, 3};
+  const auto value = vec[99999];
+#endif
+
+#ifdef UNDEFINED_BEHAVIOUR_CRASH
   int* value = new int{42};
   std::shared_ptr sp1 = std::shared_ptr<int>(value);
   std::shared_ptr sp2 = std::shared_ptr<int>(value);
@@ -52,7 +71,7 @@ auto main(void) -> int
 {
   try
   {
-    std::cout << "parsed xml: " << parse_xml(unsafe_xml) << "\n";
+    std::cout << "parsed xml: " << parse_xml(ok_xml) << "\n";
   }
   catch (const unsafe_xml_exception& e)
   {
