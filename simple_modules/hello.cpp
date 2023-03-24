@@ -1,15 +1,18 @@
 module;
 
+// These libraries don't work.
+// #include <string>
+// #include <iostream>
+
+// This does
+#include <cstdint>
 
 export module hello;
 
-import <iostream>;
-
 namespace hello
 {
-  export int say([[maybe_unused]] char* str)
+  export [[nodiscard]] auto say([[maybe_unused]] const char* str) -> std::uint64_t
   {
-    std::cout << "WTF\n";
     return 5;
   }
 }
