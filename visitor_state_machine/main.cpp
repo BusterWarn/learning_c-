@@ -17,6 +17,8 @@ namespace state
     D(const char prev_state) : prev_state(prev_state) {}
     char prev_state;
   };
+  
+  struct ERROR {};
 }
 
 namespace action
@@ -29,12 +31,36 @@ using state_t = std::variant<
   state::A,
   state::B,
   state::C,
-  state::D>;
+  state::D,
+  state::ERROR>;
 
 using action_t = std::variant<
   action::PLUS_ODD,
   action::PLUS_EVEN>;
 
+constexpr visitor state_to_char_visitor
+{
+  [] (const state::A&) -> char
+  {
+    return 'a';
+  },
+  [] (const state::B&) -> char
+  {
+    return 'b';
+  },
+  [] (const state::C&) -> char
+  {
+    return 'c';
+  },
+  [] (const state::D&) -> char
+  {
+    return 'd';
+  },
+  [] (const auto&) -> char
+  {
+    return '\0';
+  },
+};
 
 constexpr visitor change_state_visitor
 {
@@ -45,7 +71,7 @@ constexpr visitor change_state_visitor
   },
   [] (const state::A&, const action::PLUS_EVEN&) -> state_t
   {
-    return state::B{};
+    return state::C{};
   },
   
   // B
@@ -53,15 +79,15 @@ constexpr visitor change_state_visitor
   {
     return state::C{};
   },
-  [] (const state::B&, const action::PLUS_EVEN&) -> state_t
+  [] (const state::B& b, const action::PLUS_EVEN&) -> state_t
   {
-    return state::D{'b'};
+    return state::D{std::visit(state_to_char_visitor, state_t{b})};
   },
   
   // C
-  [] (const state::C&, const action::PLUS_ODD&) -> state_t
+  [] (const state::C& c, const action::PLUS_ODD&) -> state_t
   {
-    return state::D{'c'};
+    return state::D{std::visit(state_to_char_visitor, state_t{c})};
   },
   [] (const state::C&, const action::PLUS_EVEN&) -> state_t
   {
@@ -83,21 +109,28 @@ constexpr visitor change_state_visitor
   {
     return state::B{};
   },
+
+  // ERROR
+  [](const auto&, const auto&) -> state_t
+  {
+    std::cout << "ERROR" << '\n';
+    return state::ERROR{};
+  }
 };
 
 constexpr visitor print_state_visitor
 {
-  [] (const state::A& d) -> void
+  [] (const auto&) -> void
+  {
+    std::cout << "I don't care what state this is\n";
+  },
+  [] (const state::A&) -> void
   {
     std::cout << "State is A\n";
   },
   [] (const state::D& d) -> void
   {
     std::cout << "State is D. Previous state: " << d.prev_state << '\n';
-  },
-  [] (const auto&) -> void
-  {
-    std::cout << "I don't care what state this is\n";
   },
 };
 
