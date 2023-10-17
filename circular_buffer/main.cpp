@@ -66,13 +66,14 @@ struct signal
 template<event_payload Event, std::size_t N>
 class circular_buffer_array
 {
+  static_assert((N & (N - 1)) == 0 && N != 0, "Circular Buffer size N must be a power of 2");
 public:
   inline auto
   log(const Event& message) noexcept
   {
     buffer[write_index] = {std::chrono::system_clock::now(), message};
-    write_index = (write_index + 1) % N;
-    active_entries = std::min(active_entries + 1, N);
+    write_index = (write_index + 1) & (N - 1);  // Only works if N is a power of 2
+    active_entries = __builtin_expect(active_entries + 1 < N, 1) ? active_entries + 1 : N;
   }
 
   inline auto
@@ -120,7 +121,7 @@ public:
     for (const auto& [timestamp, message] : buffer)
     {
       const auto time = std::chrono::system_clock::to_time_t(timestamp);
-      os << std::put_time(std::localtime(&time), "%Y-%m-%d %X") << " - " << message << '\n';
+      os << std::put_time(std::localtime(&time), "%Y-%m-%d %X") << ' ' << message << '\n';
     }
   }
 
@@ -139,71 +140,45 @@ private:
 
 int main()
 {
-  circular_buffer_array<signal, 5> logger;
+  const std::array<signal, 5> events_to_log =
+  {
+    signal
+    {
+      ._status = signal::transmission_type::SENT,
+      ._signal = signal::signal_type::SIGNAL1,
+      ._debug_string = "This will be removed..."
+    },
+    signal
+    {
+      ._status = signal::transmission_type::SENT,
+      ._signal = signal::signal_type::SIGNAL2
+    },
+    signal
+    {
+      ._status = signal::transmission_type::RECEIVED,
+      ._signal = signal::signal_type::SIGNAL3
+    },
+    signal
+    {
+      ._status = signal::transmission_type::SENT,
+      ._signal = signal::signal_type::SIGNAL4
+    },
+    signal
+    {
+      ._status = signal::transmission_type::RECEIVED,
+      ._signal = signal::signal_type::SIGNAL5,
+      ._debug_string = " This is a weird signal..."
+    }
+  };
 
-  logger.log(signal{
-    ._status = signal::transmission_type::SENT,
-    ._signal = signal::signal_type::SIGNAL1,
-    ._debug_string = "This will be removed..."
-  });
-  logger.log(signal{
-    ._status = signal::transmission_type::SENT,
-    ._signal = signal::signal_type::SIGNAL1
-  });
-  logger.log(signal{
-    ._status = signal::transmission_type::RECEIVED,
-    ._signal = signal::signal_type::SIGNAL2
-  });
-  logger.log(signal{
-    ._status = signal::transmission_type::SENT,
-    ._signal = signal::signal_type::SIGNAL3
-  });
-  logger.log(signal{
-    ._status = signal::transmission_type::RECEIVED,
-    ._signal = signal::signal_type::SIGNAL5,
-    ._debug_string = " This is a weird signal..."
-  });
-  logger.log(signal{
-    ._status = signal::transmission_type::SENT,
-    ._signal = signal::signal_type::SIGNAL1
-  });
+  circular_buffer_array<signal, 4> array_logger;
+  circular_buffer_deque<signal, 4> deque_logger;
+  for (const auto& event_to_log : events_to_log)
+  {
+    array_logger.log(event_to_log);
+    deque_logger.log(event_to_log);
+  }
 
-  logger.to_osstream(std::cout);
-
-  std::cout << "\n LOGGER:\n" << logger.to_string() << '\n';
-  std::cout << "\n\n";
-
-  circular_buffer_deque<signal, 5> logger2;
-
-  logger2.log(signal{
-    ._status = signal::transmission_type::SENT,
-    ._signal = signal::signal_type::SIGNAL1,
-    ._debug_string = "This will be removed..."
-  });
-  logger2.log(signal{
-    ._status = signal::transmission_type::SENT,
-    ._signal = signal::signal_type::SIGNAL1
-  });
-  logger2.log(signal{
-    ._status = signal::transmission_type::RECEIVED,
-    ._signal = signal::signal_type::SIGNAL2
-  });
-  logger2.log(signal{
-    ._status = signal::transmission_type::SENT,
-    ._signal = signal::signal_type::SIGNAL3
-  });
-  logger2.log(signal{
-    ._status = signal::transmission_type::RECEIVED,
-    ._signal = signal::signal_type::SIGNAL5,
-    ._debug_string = " This is a weird signal..."
-  });
-  logger2.log(signal{
-    ._status = signal::transmission_type::SENT,
-    ._signal = signal::signal_type::SIGNAL1
-  });
-
-  logger2.to_osstream(std::cout);
-
-  std::cout << "\n LOGGER2:\n" << logger2.to_string() << '\n';
-  // assert(logger.to_string() == logger2.to_string());
+  assert(array_logger.to_string() == deque_logger.to_string());
+  array_logger.to_osstream(std::cout);
 }
