@@ -22,11 +22,11 @@ struct signal
   [[nodiscard]] inline static constexpr auto
   enum_to_cstr(const transmission_type& status) noexcept -> const char*
   {
-      switch(status) {
-          case transmission_type::SENT: return "SENT";
-          case transmission_type::RECEIVED: return "RECD";
-      }
-      return "Unknown";
+    switch(status) {
+      case transmission_type::SENT: return "SENT";
+      case transmission_type::RECEIVED: return "RECD";
+    }
+    return "Unknown";
   }
 
   [[nodiscard]] static constexpr auto
