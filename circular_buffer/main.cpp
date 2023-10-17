@@ -1,5 +1,7 @@
 #include <array>
+#include <cassert>
 #include <chrono>
+#include <deque>
 #include <iomanip>
 #include <iostream>
 #include <optional>
@@ -61,9 +63,8 @@ struct signal
   std::string _debug_string;
 };
 
-
 template<event_payload Event, std::size_t N>
-class circular_buffer
+class circular_buffer_array
 {
 public:
   inline auto
@@ -100,9 +101,45 @@ private:
   std::size_t active_entries = 0;
 };
 
+template<event_payload Event, std::size_t N>
+class circular_buffer_deque {
+public:
+  inline auto
+  log(const Event& message)
+  {
+    if (buffer.size() == N)
+    {
+        buffer.pop_front();  // Remove the oldest element
+    }
+    buffer.push_back({std::chrono::system_clock::now(), message});
+  }
+
+  inline auto
+  to_osstream(std::ostream& os) const
+  {
+    for (const auto& [timestamp, message] : buffer)
+    {
+      const auto time = std::chrono::system_clock::to_time_t(timestamp);
+      os << std::put_time(std::localtime(&time), "%Y-%m-%d %X") << " - " << message << '\n';
+    }
+  }
+
+  [[nodiscard]] inline auto
+  to_string() const -> std::string
+  {
+    std::ostringstream oss;
+    to_osstream(oss);
+    return oss.str();
+  }
+
+private:
+  std::size_t max_size;
+  std::deque<std::pair<std::chrono::system_clock::time_point, Event>> buffer;
+};
+
 int main()
 {
-  circular_buffer<signal, 5> logger;
+  circular_buffer_array<signal, 5> logger;
 
   logger.log(signal{
     ._status = signal::transmission_type::SENT,
@@ -132,4 +169,41 @@ int main()
   });
 
   logger.to_osstream(std::cout);
+
+  std::cout << "\n LOGGER:\n" << logger.to_string() << '\n';
+  std::cout << "\n\n";
+
+  circular_buffer_deque<signal, 5> logger2;
+
+  logger2.log(signal{
+    ._status = signal::transmission_type::SENT,
+    ._signal = signal::signal_type::SIGNAL1,
+    ._debug_string = "This will be removed..."
+  });
+  logger2.log(signal{
+    ._status = signal::transmission_type::SENT,
+    ._signal = signal::signal_type::SIGNAL1
+  });
+  logger2.log(signal{
+    ._status = signal::transmission_type::RECEIVED,
+    ._signal = signal::signal_type::SIGNAL2
+  });
+  logger2.log(signal{
+    ._status = signal::transmission_type::SENT,
+    ._signal = signal::signal_type::SIGNAL3
+  });
+  logger2.log(signal{
+    ._status = signal::transmission_type::RECEIVED,
+    ._signal = signal::signal_type::SIGNAL5,
+    ._debug_string = " This is a weird signal..."
+  });
+  logger2.log(signal{
+    ._status = signal::transmission_type::SENT,
+    ._signal = signal::signal_type::SIGNAL1
+  });
+
+  logger2.to_osstream(std::cout);
+
+  std::cout << "\n LOGGER2:\n" << logger2.to_string() << '\n';
+  // assert(logger.to_string() == logger2.to_string());
 }
