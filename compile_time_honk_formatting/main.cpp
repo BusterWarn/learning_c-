@@ -9,13 +9,14 @@
 class animals
 {
 public:
-  static animals& getInstance()
+  static animals& get_instance()
   {
     static animals instance;
     return instance;
   }
 
-  void make_animal_sound(std::function<void(std::ostream&)> callback) {
+  void make_animal_sound(std::function<void(std::ostream&)> callback)
+  {
     callback(std::cout);
   }
 };
@@ -49,7 +50,7 @@ class goose {
 public:
   goose()
   {
-    animals::getInstance().make_animal_sound([&](std::ostream& os)
+    animals::get_instance().make_animal_sound([&](std::ostream& os)
     {
       static_assert(goose_str::padding_size == 21); // Not at all needed, just to show it is known at compile time.
 
@@ -57,6 +58,12 @@ public:
       os << std::left << std::setw(goose_str::padding_size) << goose_str::honk_sad << "hoonk" << std::endl;
       os << std::left << std::setw(goose_str::padding_size) << goose_str::honk_panic << "honk honk hooooonk" << std::endl;
       os << std::left << std::setw(goose_str::padding_size) << goose_str::honk_relax << "honk" << std::endl;
+
+      // Could also be done like this...
+      // os <<  "Happy Honk!          " << "honk honk" << std::endl;
+      // os <<  "Sad Honk...          " << "hoonk" << std::endl;
+      // os <<  "EMERGENCY HONK!!!1!  " << "honk honk hooooonk" << std::endl;
+      // os <<  "Relaxed honk.        " << "honk" << std::endl;
     });
   }
 };
