@@ -1,10 +1,6 @@
-#include <algorithm>
-#include <array>
-#include <cstring>
 #include <functional>
 #include <iomanip>
 #include <iostream>
-#include <ranges>
 
 class animals
 {
@@ -28,22 +24,20 @@ namespace goose_str
   static constexpr auto honk_panic = "EMERGENCY HONK!!!1!";
   static constexpr auto honk_relax = "Relaxed honk.";
 
-  consteval auto compute_padding_size()
+  template<typename... Strs>
+  [[nodiscard]] consteval auto compute_padding_size(Strs... strs)
   {
-    std::array<const char*, 4> honk_descriptions
-    {
-      honk_happy,
-      honk_sad,
-      honk_panic,
-      honk_relax
-    };
+    const std::string_view values[] {strs...};
 
-    return std::strlen(*std::ranges::max_element(honk_descriptions, {}, [](const auto& str) {
-      return std::strlen(str);
-    })) + 2;  // +2 for buffer
+    auto max_it = std::max_element(values,
+                                   values + sizeof...(Strs),
+                                  [](const auto& a, const auto& b) {
+                                    return a.size() < b.size();
+                                  });
+    return max_it->size() + 2;  // +2 for buffer
   }
 
-  static constexpr auto padding_size = compute_padding_size();
+  static constexpr auto padding_size = compute_padding_size(honk_happy, honk_sad, honk_panic, honk_relax);
 }
 
 class goose {
