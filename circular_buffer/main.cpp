@@ -4,15 +4,26 @@
 #include <deque>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <sstream>
 #include <string_view>
 #include <type_traits>
 
-template<typename payload>
-concept event_payload = requires(payload a, std::ostream& os) {
-  { a.to_osstream(os) } -> std::same_as<void>;
-};
+template<typename Pointer>
+concept is_pointer_like = std::is_pointer_v<Pointer> || requires(Pointer pointer) { pointer.operator->(); };
+
+template<typename Payload>
+concept event_payload = 
+(is_pointer_like<Payload> && requires(Payload payload, std::ostream& os)
+{
+  {payload->to_osstream(os)} -> std::same_as<void>;
+})
+||
+(!is_pointer_like<Payload> && requires(Payload payload, std::ostream& os)
+{
+  {payload.to_osstream(os)} -> std::same_as<void>;
+});
 
 struct signal
 {
@@ -45,8 +56,8 @@ struct signal
 
   inline friend std::ostream& operator<<(std::ostream& os, const signal& sig) noexcept
   {
-      sig.to_osstream(os);
-      return os;
+    sig.to_osstream(os);
+    return os;
   }
 
   inline void
@@ -181,4 +192,8 @@ int main()
 
   assert(array_logger.to_string() == deque_logger.to_string());
   array_logger.to_osstream(std::cout);
+
+  // Just to show that concept accepts pointers as well.
+  circular_buffer_array<signal*, 4> array_logger_with_pointers;
+  circular_buffer_array<std::unique_ptr<signal>, 4> array_logger_with_smart_pointers;
 }
