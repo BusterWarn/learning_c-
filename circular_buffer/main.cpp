@@ -79,10 +79,13 @@ class circular_buffer_array
 {
   static_assert((N & (N - 1)) == 0 && N != 0, "Circular Buffer size N must be a power of 2");
 public:
+  // Logs an event to the buffer, utilizing C++20's Abbreviated Function Templates for concise syntax.
+  // `event_payload auto&& message` allows for perfect forwarding, keeping the value category (lvalue/rvalue) of `message`.
+  // `std::forward<decltype(message)>(message)` is used to forward the `message` argument to the buffer without any extra copying or moving.
   inline auto
-  log(const Event& message) noexcept
+  log(event_payload auto&& message) noexcept
   {
-    buffer[write_index] = {std::chrono::system_clock::now(), message};
+    buffer[write_index] = {std::chrono::system_clock::now(), std::forward<decltype(message)>(message)};
     write_index = (write_index + 1) & (N - 1);  // Only works if N is a power of 2
     active_entries = __builtin_expect(active_entries + 1 < N, 1) ? active_entries + 1 : N;
   }
@@ -116,6 +119,7 @@ private:
 template<event_payload Event, std::size_t N>
 class circular_buffer_deque {
 public:
+  // Lvalue reference
   inline auto
   log(const Event& message)
   {
@@ -124,6 +128,17 @@ public:
         buffer.pop_front();  // Remove the oldest element
     }
     buffer.push_back({std::chrono::system_clock::now(), message});
+  }
+
+  // Rvalue reference
+  inline auto
+  log(Event&& message)
+  {
+    if (buffer.size() == N)
+    {
+        buffer.pop_front();  // Remove the oldest element
+    }
+    buffer.push_back({std::chrono::system_clock::now(), std::move(message)});
   }
 
   inline auto
@@ -195,5 +210,12 @@ int main()
 
   // Just to show that concept accepts pointers as well.
   circular_buffer_array<signal*, 4> array_logger_with_pointers;
-  circular_buffer_array<std::unique_ptr<signal>, 4> array_logger_with_smart_pointers;
+  auto *const signal_p = new signal; // This can be const
+  array_logger_with_pointers.log(std::move(signal_p)); // Must use std::move here...
+  delete signal_p;
+
+  circular_buffer_deque<std::unique_ptr<signal>, 4> deque_logger_with_smart_pointers;
+  deque_logger_with_smart_pointers.log(std::make_unique<signal>());
+  auto signal_up = std::make_unique<signal>(); // This cannot be const
+  deque_logger_with_smart_pointers.log(std::move(signal_up));
 }
