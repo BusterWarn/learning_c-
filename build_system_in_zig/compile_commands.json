@@ -1,0 +1,17 @@
+[
+  {
+    "directory": ".",
+    "file": "src/main.cc",
+    "command": "clang++ -std=c++17 -Isrc/swu/store/export -Isrc/swu/store/inc -Isrc/swu/math/export -Isrc/swu/math/inc -Isrc src/main.cc"
+  },
+  {
+    "directory": ".",
+    "file": "src/swu/store/src/process_order_impl.cc",
+    "command": "clang++ -std=c++17 -Isrc/swu/store/export -Isrc/swu/store/inc -Isrc/swu/math/export -Isrc src/swu/store/src/process_order_impl.cc"
+  },
+  {
+    "directory": ".",
+    "file": "src/swu/math/src/calculator_impl.cc",
+    "command": "clang++ -std=c++17 -Isrc/swu/store/export -Isrc/swu/math/export -Isrc/swu/math/inc -Isrc src/swu/math/src/calculator_impl.cc"
+  }
+]

@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# Zig?
+zig_cache
+zig_build
